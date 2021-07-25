@@ -323,6 +323,10 @@ def encode_json(obj):
     from .json import PlainSerializer
     return PlainSerializer.encode(obj)
 
+def decode_json(obj):
+    from .json import PlainSerializer
+    return PlainSerializer.decode(obj)
+
 def dump_json(js):
     from json import dumps
     return dumps(js, indent=4)
@@ -383,6 +387,34 @@ PIPELINES = {
         (read_json, annotate_chunks, apply_transforms,
          gen_latex_snippets, dump_latex_snippets,
          write_file(".snippets.tex", strip=(".lean", ".lean3", ".json",)))
+    },
+    'coq.io.json': {
+        'snippets-html':
+        (read_json, decode_json, apply_transforms,
+         gen_html_snippets, dump_html_snippets,
+         write_file(".snippets.html", strip=(".v", ".io", ".json"))),
+        'snippets-latex':
+        (read_json, decode_json, apply_transforms,
+         gen_latex_snippets, dump_latex_snippets,
+         write_file(".snippets.tex", strip=(".v", ".io", ".json"))),
+        'webpage':
+        (read_json, decode_json, apply_transforms, gen_html_snippets,
+         dump_html_standalone, copy_assets,
+         write_file(".html", strip=(".io", ".json",))),
+    },
+    'lean3.io.json': {
+        'snippets-html':
+        (read_json, decode_json, apply_transforms,
+         gen_html_snippets, dump_html_snippets,
+         write_file(".snippets.html", strip=(".lean", ".lean3", ".io", ".json"))),
+        'snippets-latex':
+        (read_json, decode_json, apply_transforms,
+         gen_latex_snippets, dump_latex_snippets,
+         write_file(".snippets.tex", strip=(".lean", ".lean3", ".io", ".json"))),
+        'webpage':
+        (read_json, decode_json, apply_transforms, gen_html_snippets,
+         dump_html_standalone, copy_assets,
+         write_file(".html", strip=(".io", ".json"))),
     },
     'coq': {
         'null':
@@ -482,6 +514,7 @@ PIPELINES = {
 FRONTENDS_BY_EXTENSION = [
     ('.v', 'coq+rst'), ('.lean', 'lean3'), ('.lean3', 'lean3'),
     ('.v.json', 'coq.json'), ('.lean3.json', 'lean3.json'),
+    ('.v.io.json', 'coq.io.json'), ('.lean3.io.json', 'lean3.io.json'),
     ('.rst', 'rst'), ('.md', 'md')
 ]
 BACKENDS_BY_EXTENSION = [
@@ -497,6 +530,8 @@ BACKENDS_BY_EXTENSION = [
 DEFAULT_BACKENDS = {
     'coq.json': 'json',
     'lean3.json': 'json',
+    'coq.io.json': 'webpage',
+    'lean3.io.json': 'webpage',
     'coq': 'webpage',
     'coqdoc': 'webpage',
     'coq+rst': 'webpage',
@@ -514,6 +549,8 @@ INPUT_LANGUAGE_BY_FRONTEND = {
     "lean3": "lean3",
     "coq.json": "coq",
     "lean3.json": "lean3",
+    "coq.io.json": "coq",
+    "lean3.io.json": "lean3",
 }
 
 def infer_mode(fpath, kind, arg, table):

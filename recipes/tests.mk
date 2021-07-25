@@ -40,10 +40,24 @@ _output/tests/latex_formatting.tex: tests/latex_formatting.v
 _output/tests/linter.lint.json: tests/linter.v
 	$(alectryon) $< --backend lint
 
+# Coq → JSON
+_output/tests/recording.v.io.json: tests/recording.v
+	$(alectryon) $< --frontend coq --backend json
+
+# IO → HTML
+_output/tests/recording.v.html: tests/recording.v.io.json
+	$(alectryon) $<
+# IO → HTML
+_output/tests/recording.snippets.html: tests/recording.v.io.json
+	$(alectryon) $< --backend snippets-html
+# IO → LaTeX
+_output/tests/recording.snippets.tex: tests/recording.v.io.json
+	$(alectryon) $< --backend snippets-latex
+
 # Coq → HTML
 _output/tests/screenshot.html: tests/screenshot.v
 	$(alectryon) $<
 
-_output/tests/dialects.4.html _output/tests/dialects.5.html _output/tests/dialects.tex _output/tests/dialects.xe.tex _output/tests/dialects.lua.tex _output/tests/directive-options.html _output/tests/directive-options.xe.tex _output/tests/doctests.out _output/tests/latex_formatting.tex _output/tests/linter.lint.json _output/tests/screenshot.html: out_dir := _output/tests
+_output/tests/dialects.4.html _output/tests/dialects.5.html _output/tests/dialects.tex _output/tests/dialects.xe.tex _output/tests/dialects.lua.tex _output/tests/directive-options.html _output/tests/directive-options.xe.tex _output/tests/doctests.out _output/tests/latex_formatting.tex _output/tests/linter.lint.json _output/tests/recording.v.io.json _output/tests/recording.v.html _output/tests/recording.snippets.html _output/tests/recording.snippets.tex _output/tests/screenshot.html: out_dir := _output/tests
 
-targets += _output/tests/dialects.4.html _output/tests/dialects.5.html _output/tests/dialects.tex _output/tests/dialects.xe.tex _output/tests/dialects.lua.tex _output/tests/directive-options.html _output/tests/directive-options.xe.tex _output/tests/doctests.out _output/tests/latex_formatting.tex _output/tests/linter.lint.json _output/tests/screenshot.html
+targets += _output/tests/dialects.4.html _output/tests/dialects.5.html _output/tests/dialects.tex _output/tests/dialects.xe.tex _output/tests/dialects.lua.tex _output/tests/directive-options.html _output/tests/directive-options.xe.tex _output/tests/doctests.out _output/tests/latex_formatting.tex _output/tests/linter.lint.json _output/tests/recording.v.io.json _output/tests/recording.v.html _output/tests/recording.snippets.html _output/tests/recording.snippets.tex _output/tests/screenshot.html

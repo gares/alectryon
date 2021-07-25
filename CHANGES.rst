@@ -7,6 +7,8 @@ Lean 3
 
 - Alectryon caches now support mixing multiple languages.
 
+- JSON recordings (produced by ``--backend json``) can now be used as inputs to generate webpages or highlighted snippets.
+
 Breaking changes
 ----------------
 
