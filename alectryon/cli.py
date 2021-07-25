@@ -36,7 +36,7 @@ def read_plain(_, fpath, fname):
         return f.read()
 
 def read_json(_, fpath, fname):
-    from json import load
+    from .json import load
     if fname == "-":
         return load(sys.stdin)
     with open(fpath, encoding="utf-8") as f:
