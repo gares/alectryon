@@ -20,7 +20,7 @@
     [
         {
             "_type": "text",
-            "contents": "(* $ alectryon fragments.v.json # JSON \u2192 JSON; produces \u2018fragments.io.json\u2019 *)"
+            "contents": "(* $ alectryon fragments.v.json # JSON \u2192 JSON; produces \u2018fragments.v.io.json\u2019 *)"
         }
     ],
     [

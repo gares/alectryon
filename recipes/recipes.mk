@@ -22,7 +22,7 @@ _output/coqdoc.html: coqdoc.v
 	$(alectryon) $< --frontend coqdoc
 
 # JSON → JSON
-_output/fragments.io.json: fragments.v.json
+_output/fragments.v.io.json: fragments.v.json
 	$(alectryon) $<
 # JSON → HTML
 _output/fragments.snippets.html: fragments.v.json
@@ -82,6 +82,6 @@ _output/plain.lean.html: plain.lean
 _output/plain.v.html: plain.v
 	$(alectryon) --frontend coq $<
 
-_output/api.out _output/api.rst.out _output/caching.html _output/coqdoc.html _output/fragments.io.json _output/fragments.snippets.html _output/fragments.snippets.tex _output/lean3-tutorial.html _output/literate_MyST.html _output/literate_coq.html _output/literate_coq.tex _output/literate_coq.v.rst _output/literate_reST.html _output/literate_reST.tex _output/literate_reST.v _output/mathjax.html _output/minification.html _output/minimal.html _output/minimal.no-alectryon.html _output/plain.lean.html _output/plain.v.html: out_dir := _output
+_output/api.out _output/api.rst.out _output/caching.html _output/coqdoc.html _output/fragments.v.io.json _output/fragments.snippets.html _output/fragments.snippets.tex _output/lean3-tutorial.html _output/literate_MyST.html _output/literate_coq.html _output/literate_coq.tex _output/literate_coq.v.rst _output/literate_reST.html _output/literate_reST.tex _output/literate_reST.v _output/mathjax.html _output/minification.html _output/minimal.html _output/minimal.no-alectryon.html _output/plain.lean.html _output/plain.v.html: out_dir := _output
 
-targets += _output/api.out _output/api.rst.out _output/caching.html _output/coqdoc.html _output/fragments.io.json _output/fragments.snippets.html _output/fragments.snippets.tex _output/lean3-tutorial.html _output/literate_MyST.html _output/literate_coq.html _output/literate_coq.tex _output/literate_coq.v.rst _output/literate_reST.html _output/literate_reST.tex _output/literate_reST.v _output/mathjax.html _output/minification.html _output/minimal.html _output/minimal.no-alectryon.html _output/plain.lean.html _output/plain.v.html
+targets += _output/api.out _output/api.rst.out _output/caching.html _output/coqdoc.html _output/fragments.v.io.json _output/fragments.snippets.html _output/fragments.snippets.tex _output/lean3-tutorial.html _output/literate_MyST.html _output/literate_coq.html _output/literate_coq.tex _output/literate_coq.v.rst _output/literate_reST.html _output/literate_reST.tex _output/literate_reST.v _output/mathjax.html _output/minification.html _output/minimal.html _output/minimal.no-alectryon.html _output/plain.lean.html _output/plain.v.html

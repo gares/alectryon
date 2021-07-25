@@ -22,6 +22,7 @@ import argparse
 import inspect
 import os
 import os.path
+import re
 import shutil
 import sys
 
@@ -318,7 +319,7 @@ def dump_html_standalone(snippets, fname, webpage_style,
 
     return doc.render(pretty=False)
 
-def prepare_json(obj):
+def encode_json(obj):
     from .json import PlainSerializer
     return PlainSerializer.encode(obj)
 
@@ -340,51 +341,48 @@ def dump_latex_snippets(snippets):
         s += "\n%% alectryon-block-end\n"
     return s
 
-def strip_extension(fname):
-    for ext in EXTENSIONS:
-        if fname.endswith(ext):
-            return fname[:-len(ext)]
-    return fname
-
-def write_output(ext, contents, fname, output, output_directory, replace_ext=True):
+def write_output(ext, contents, fname, output, output_directory, strip_re):
     if output == "-" or (output is None and fname == "-"):
         sys.stdout.write(contents)
     else:
         if not output:
-            fname = strip_extension(fname) if replace_ext else fname
+            fname = strip_re.sub("", fname)
             output = os.path.join(output_directory, fname + ext)
         with open(output, mode="w", encoding="utf-8") as f:
             f.write(contents)
 
-def write_file(ext, replace_ext=True):
+def write_file(ext, strip):
+    strip = re.compile("(" + "|".join(re.escape(ext) for ext in strip) + ")*\\Z")
     return lambda contents, fname, output, output_directory: \
         write_output(ext, contents, fname, output, output_directory,
-                     replace_ext=replace_ext)
+                     strip_re=strip)
 
 # No ‘apply_transforms’ in JSON pipelines: (we save the prover output without
 # modifications).
 PIPELINES = {
     'coq.json': {
         'json':
-        (read_json, annotate_chunks, prepare_json, dump_json,
-         write_file(".io.json")),
+        (read_json, annotate_chunks, encode_json, dump_json,
+         write_file(".io.json", strip=(".json",))),
         'snippets-html':
         (read_json, annotate_chunks, apply_transforms, gen_html_snippets,
-         dump_html_snippets, write_file(".snippets.html")),
+         dump_html_snippets, write_file(".snippets.html", strip=(".v", ".json",))),
         'snippets-latex':
         (read_json, annotate_chunks, apply_transforms, gen_latex_snippets,
-         dump_latex_snippets, write_file(".snippets.tex"))
+         dump_latex_snippets, write_file(".snippets.tex", strip=(".v", ".json",)))
     },
     'lean3.json': {
         'json':
-        (read_json, annotate_chunks, prepare_json, dump_json,
-         write_file(".io.json")),
+        (read_json, annotate_chunks, encode_json, dump_json,
+         write_file(".io.json", strip=(".json",))),
         'snippets-html':
-        (read_json, annotate_chunks, apply_transforms, gen_html_snippets,
-         dump_html_snippets, write_file(".snippets.html")),
+        (read_json, annotate_chunks, apply_transforms,
+         gen_html_snippets, dump_html_snippets,
+         write_file(".snippets.html", strip=(".lean", ".lean3", ".json",))),
         'snippets-latex':
-        (read_json, annotate_chunks, apply_transforms, gen_latex_snippets,
-         dump_latex_snippets, write_file(".snippets.tex"))
+        (read_json, annotate_chunks, apply_transforms,
+         gen_latex_snippets, dump_latex_snippets,
+         write_file(".snippets.tex", strip=(".lean", ".lean3", ".json",)))
     },
     'coq': {
         'null':
@@ -392,21 +390,23 @@ PIPELINES = {
         'webpage':
         (read_plain, parse_plain, annotate_chunks, apply_transforms,
          gen_html_snippets, dump_html_standalone, copy_assets,
-         write_file(".html", replace_ext=False)),
+         write_file(".html", strip=())),
         'snippets-html':
         (read_plain, parse_plain, annotate_chunks, apply_transforms,
-         gen_html_snippets, dump_html_snippets, write_file(".snippets.html")),
+         gen_html_snippets, dump_html_snippets,
+         write_file(".snippets.html", strip=(".v",))),
         'snippets-latex':
         (read_plain, parse_plain, annotate_chunks, apply_transforms,
-         gen_latex_snippets, dump_latex_snippets, write_file(".snippets.tex")),
+         gen_latex_snippets, dump_latex_snippets,
+         write_file(".snippets.tex", strip=(".v",))),
         'lint':
         (read_plain, register_docutils, lint_docutils,
-         write_file(".lint.json")),
+         write_file(".lint.json", strip=(".v",))),
         'rst':
-        (read_plain, code_to_rst, write_file(".rst", replace_ext=False)),
+        (read_plain, code_to_rst, write_file(".rst", strip=())),
         'json':
-        (read_plain, parse_plain, annotate_chunks, prepare_json, dump_json,
-         write_file(".io.json"))
+        (read_plain, parse_plain, annotate_chunks, encode_json, dump_json,
+         write_file(".io.json", strip=()))
     },
     'lean3': {
         'null':
@@ -414,70 +414,73 @@ PIPELINES = {
         'webpage':
         (read_plain, parse_plain, annotate_chunks, apply_transforms,
          gen_html_snippets, dump_html_standalone, copy_assets,
-         write_file(".html", replace_ext=False)),
+         write_file(".html", strip=())),
         'snippets-html':
         (read_plain, parse_plain, annotate_chunks, apply_transforms,
-         gen_html_snippets, dump_html_snippets, write_file(".snippets.html")),
+         gen_html_snippets, dump_html_snippets,
+         write_file(".snippets.html", strip=(".lean", ".lean3"))),
         'snippets-latex':
         (read_plain, parse_plain, annotate_chunks, apply_transforms,
-         gen_latex_snippets, dump_latex_snippets, write_file(".snippets.tex")),
+         gen_latex_snippets, dump_latex_snippets,
+         write_file(".snippets.tex", strip=(".lean", ".lean3"))),
         'json':
-        (read_plain, parse_plain, annotate_chunks, prepare_json, dump_json,
-         write_file(".io.json"))
+        (read_plain, parse_plain, annotate_chunks, encode_json, dump_json,
+         write_file(".io.json", strip=()))
     },
     'coq+rst': {
         'webpage':
         (read_plain, register_docutils, gen_docutils, copy_assets,
-         write_file(".html")),
+         write_file(".html", strip=(".v", ".rst"))),
         'latex':
         (read_plain, register_docutils, gen_docutils, copy_assets,
-         write_file(".tex")),
+         write_file(".tex", strip=(".v", ".rst"))),
         'lint':
         (read_plain, register_docutils, lint_docutils,
-         write_file(".lint.json")),
+         write_file(".lint.json", strip=(".v", ".rst"))),
         'rst':
-        (read_plain, code_to_rst, write_file(".v.rst")),
+        (read_plain, code_to_rst, write_file(".v.rst", strip=(".v", ".rst"))),
     },
     'coqdoc': {
         'webpage':
         (read_plain, parse_plain, annotate_chunks, # transforms applied later
          gen_html_snippets_with_coqdoc, dump_html_standalone, copy_assets,
-         write_file(".html")),
+         write_file(".html", strip=(".v",))),
     },
     'rst': {
         'webpage':
         (read_plain, register_docutils, gen_docutils, copy_assets,
-         write_file(".html")),
+         write_file(".html", strip=(".v", ".lean", ".lean3", ".rst"))),
         'latex':
         (read_plain, register_docutils, gen_docutils, copy_assets,
-         write_file(".tex")),
+         write_file(".tex", strip=(".v", ".lean", ".lean3", ".rst"))),
         'lint':
         (read_plain, register_docutils, lint_docutils,
-         write_file(".lint.json")),
+         write_file(".lint.json", strip=(".v", ".lean", ".lean3", ".rst"))),
         'coq':
-        (read_plain, rst_to_code, write_file(".v")),
+        (read_plain, rst_to_code,
+         write_file(".v", strip=(".v", ".lean", ".lean3", ".rst"))),
         'coq+rst':
-        (read_plain, rst_to_code, write_file(".v"))
+        (read_plain, rst_to_code,
+         write_file(".v", strip=(".v", ".lean", ".lean3", ".rst")))
     },
     'md': {
         'webpage':
         (read_plain, register_docutils, gen_docutils, copy_assets,
-         write_file(".html")),
+         write_file(".html", strip=(".v", ".lean", ".lean3", ".md"))),
         'latex':
         (read_plain, register_docutils, gen_docutils, copy_assets,
-         write_file(".tex")),
+         write_file(".tex", strip=(".v", ".lean", ".lean3", ".md"))),
         'lint':
         (read_plain, register_docutils, lint_docutils,
-         write_file(".lint.json"))
+         write_file(".lint.json", strip=(".v", ".lean", ".lean3", ".md")))
     }
 }
 
 # CLI
 # ===
 
-EXTENSIONS = ['.v', '.lean', '.lean.json', '.v.json', '.json', '.v.rst', '.rst', '.md']
 FRONTENDS_BY_EXTENSION = [
-    ('.v', 'coq+rst'), ('.lean', 'lean3'),
+    ('.v', 'coq+rst'), ('.lean', 'lean3'), ('.lean3', 'lean3'),
     ('.v.json', 'coq.json'), ('.lean3.json', 'lean3.json'),
     ('.rst', 'rst'), ('.md', 'md')
 ]

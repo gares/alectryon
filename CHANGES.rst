@@ -5,7 +5,12 @@
 Lean 3
 ======
 
-- Change the cache format to support multi-language caches.
+- Alectryon caches now support mixing multiple languages.
+
+Breaking changes
+----------------
+
+- The default file extension for JSON recordings is now ``.v.io.json`` instead of ``.io.json``.
 
 Unreleased
 ==========
