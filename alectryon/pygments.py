@@ -124,7 +124,7 @@ def highlight_html(code, lang):
     implementation of ``alectryon.cli.dump_html_standalone`` to see how the CLI
     does it.
 
-    >>> str(highlight_html("Program Fixpoint a := 1."))
+    >>> str(highlight_html("Program Fixpoint a := 1.", lang="coq"))
     '<span class="kn">Program Fixpoint</span> <span class="nf">a</span> := <span class="mi">1</span>.'
     """
     return dom_raw("".join(_highlight(code, get_lexer(lang), HTML_FORMATTER)))
